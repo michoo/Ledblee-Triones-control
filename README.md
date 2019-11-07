@@ -1,39 +1,42 @@
 # Ledblee-Triones-control
-Ledblee Triones bluetooth controled rgb strip 
+Ledblee Triones bluetooth controled rgb bulb
 
-http://cgi.ebay.com/ws/eBayISAPI.dll?ViewItemVersion&item=142322011085&view=all&tid=1485433771004
-https://learn.adafruit.com/reverse-engineering-a-bluetooth-low-energy-light-bulb/control-with-bluez
+https://www.ebay.ca/itm/RGB-RGBW-LED-Bulb-Light-Color-Change-E27-Lamp-Bulbs-Dimmable-Remote-Controller/254240747070
 
 ## Preparation
 ```
 sudo hcitool lescan
 LE Scan ...
-34:15:13:E2:EF:58 Triones-13E2EF58
-```
-
-## Color mode
-```
-pi@raspberrypi:~ $ sudo gatttool -I
-[                 ][LE]> connect 34:15:13:E2:EF:58
-Attempting to connect to 34:15:13:E2:EF:58
+FF:FF:55:E0:98:AA  Triones-FFFF55E098AA
+$ sudo gatttool -I
+[                 ][LE]> connect FF:FF:55:E0:98:AA 
+Attempting to connect to FF:FF:55:E0:98:AA
 Connection successful
-[34:15:13:E2:EF:58][LE]> char-write-cmd 0x0043 5600ff0000f0aa
-[34:15:13:E2:EF:58][LE]> char-write-cmd 0x0043 560000ff00f0aa
-[34:15:13:E2:EF:58][LE]>
+[FF:FF:55:E0:98:AA][LE]> primary
+attr handle: 0x0001, end grp handle: 0x0004 uuid: 0000ffd0-0000-1000-8000-00805f9b34fb
+attr handle: 0x0005, end grp handle: 0x0007 uuid: 0000ffd5-0000-1000-8000-00805f9b34fb
+[FF:FF:55:E0:98:AA][LE]> char-desc
+handle: 0x0001, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x0002, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x0003, uuid: 0000ffd4-0000-1000-8000-00805f9b34fb
+handle: 0x0004, uuid: 00002902-0000-1000-8000-00805f9b34fb
+handle: 0x0005, uuid: 00002800-0000-1000-8000-00805f9b34fb
+handle: 0x0006, uuid: 00002803-0000-1000-8000-00805f9b34fb
+handle: 0x0007, uuid: 0000ffd9-0000-1000-8000-00805f9b34fb
 ```
-56(11)(22)(33)(44)f0aa
+to identify what you can do, use on your smart phone bluetooth app like "Blue Scanner" on Iphone to play with uuid (first digits). Then, you'll identify write, read,... For me 0xffd9 was the input to upload colours. So the handle is 0x0007 (see example below, at the end)
+
+
+## Color mode command
+
+cmd: 56(11)(22)(33)(44)f0aa
 1. Red
 1. Green
 1. Blue
 1. White
 
-
-## Pattern mode
-
-```
-sudo gatttool  -b 34:15:13:E2:EF:58 --char-write -a 0x0043 -n bb260544
-```
-bb(11)(22)44
+## Pattern mode command
+cmd: bb(11)(22)44
 * 1: Color mode
   * 23: Smooth color
   * 24: ???
@@ -54,3 +57,8 @@ bb(11)(22)44
   * 33: blue strobe
   * 34: strobe...
 * 2: Speed
+
+## example of complete command
+```
+sudo gatttool  -b FF:FF:55:E0:98:AA  --char-write -a 0x0007 -n bb260544
+```
